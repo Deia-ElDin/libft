@@ -1,0 +1,103 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   ft_split.c                                         :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: dehamad <dehamad@student.42abudhabi.ae>    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2023/12/21 02:05:19 by dehamad           #+#    #+#             */
+/*   Updated: 2023/12/25 00:41:19 by dehamad          ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+#include "libft.h"
+
+static int	ft_issep(char s, char c)
+{
+	return ((unsigned char)s == (unsigned char)c);
+}
+
+static int	handle_count(char const *s, char c)
+{
+	int	words;
+	int	i;
+
+	words = 0;
+	i = 0;
+	while (s[i])
+	{
+		while (s[i] && ft_issep(s[i], c))
+			i++;
+		if (s[i] && !ft_issep(s[i], c))
+		{
+			words++;
+			while (s[i] && !ft_issep(s[i], c))
+				i++;
+		}
+	}
+	return (words);
+}
+
+static char	*handle_malloc(char	**split, char const *s, int first, int last)
+{
+	char	*word;
+	size_t	i;
+
+	word = ft_substr(s, first, last - first);
+	if (!word)
+	{
+		i = 0;
+		while (split[i])
+		{
+			free(split[i]);
+			i++;
+		}
+		return (NULL);
+	}
+	return (word);
+}
+
+static char	**handle_split(char	**split, char const *s, char c)
+{
+	int		i;
+	int		index;
+	int		st;
+
+	i = 0;
+	index = 0;
+	while (s[i])
+	{
+		while (s[i] && ft_issep(s[i], c))
+			i++;
+		if (s[i] && !ft_issep(s[i], c))
+		{
+			st = i;
+			while (s[i] && !ft_issep(s[i], c))
+				i++;
+			split[index] = handle_malloc(split, s, st, i);
+			if (!split[index])
+			{
+				free(split);
+				return (NULL);
+			}
+			index++;
+		}
+	}
+	return (split);
+}
+
+char	**ft_split(char const *s, char c)
+{
+	char	**split;
+	size_t	len;
+
+	if (!s)
+		return (NULL);
+	len = handle_count(s, c) + 1;
+	split = malloc((sizeof(char *) * len));
+	if (!split)
+		return (NULL);
+	while (len--)
+		split[len] = NULL;
+	return (handle_split(split, s, c));
+}
